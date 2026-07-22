@@ -1,0 +1,35 @@
+name: Generate M3U Playlist
+
+on:
+  workflow_dispatch: # ম্যানুয়ালি রান করার জন্য
+  schedule:
+    - cron: '0 0 * * *' # প্রতিদিন একবার অটোমেটিক রান হবে (প্রয়োজনমতো পরিবর্তন করতে পারেন)
+
+jobs:
+  build:
+    runs-on: self-hosted # আপনার লোকাল কম্পিউটার বা সার্ভার ব্যবহারের জন্য
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        pip install requests beautifulsoup4
+
+    - name: Run scraping script
+      run: python scrape.py
+
+    - name: Commit and push generated playlist
+      run: |
+        git config --global user.name "GitHub Actions Bot"
+        git config --global user.email "actions@github.com"
+        git add playlist.m3u
+        git commit -m "Auto-update M3U playlist [skip ci]" || echo "No changes to commit"
+        git push
+        
